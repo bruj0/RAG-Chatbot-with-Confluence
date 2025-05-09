@@ -3,7 +3,7 @@
 **Help desk** allows you to create a Question Answering bot with a streamlit UI using your company Confluence data.
 
 <p align="center">
-  <img src="./docs/help_desk.gif" alt="animated" />
+  <img src="./docs/Screenshot_6-5-2025_141558_localhost.jpeg" alt="animated" />
 </p>
 
 # How to use
@@ -17,7 +17,7 @@
      - `cp .env.template .env`
 
 - Check the `config.py` and `env.template` file.
-- To collect data from Confluence you will have to:
+- To collect data from Confluence y1ou will have to:
   - Create your own Conluence space with page informations
   - Create and feed your API key [here]('https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/')
   - Insert in the  `env` file:

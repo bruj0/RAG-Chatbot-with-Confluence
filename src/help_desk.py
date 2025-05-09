@@ -1,26 +1,33 @@
 import sys
 import load_db
 import collections
-from langchain.llms import OpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_ollama import OllamaLLM
 
 
 class HelpDesk():
     """Create the necessary objects to create a QARetrieval chain"""
     def __init__(self, new_db=True):
-
+        """
+        Initialize the HelpDesk object.
+        
+        Args:
+            new_db (bool): Whether to create a new database or use an existing one.
+        """
         self.new_db = new_db
         self.template = self.get_template()
-        self.embeddings = self.get_embeddings()
         self.llm = self.get_llm()
         self.prompt = self.get_prompt()
 
+        # Create data loader
+        self.data_loader = load_db.DataLoader()
+
         if self.new_db:
-            self.db = load_db.DataLoader().set_db(self.embeddings)
+            self.db = self.data_loader.set_db()
         else:
-            self.db = load_db.DataLoader().get_db(self.embeddings)
+            self.db = self.data_loader.get_db()
 
         self.retriever = self.db.as_retriever()
         self.retrieval_qa_chain = self.get_retrieval_qa()
@@ -45,12 +52,17 @@ class HelpDesk():
         )
         return prompt
 
-    def get_embeddings(self) -> OpenAIEmbeddings:
-        embeddings = OpenAIEmbeddings()
-        return embeddings
-
     def get_llm(self):
-        llm = OpenAI()
+        """
+        Returns the Ollama LLM with Mistral model
+        """
+        # Initialize Ollama with the Mistral model and custom base URL
+        llm = OllamaLLM(
+            model="mistral", 
+            temperature=0.7,
+            streaming=True,
+            base_url="http://192.168.178.106:11434"
+        )
         return llm
 
     def get_retrieval_qa(self):
@@ -86,10 +98,10 @@ class HelpDesk():
             distinct_sources_str = "  \n- ".join(distinct_sources)
 
         if len(distinct_sources) == 1:
-            return f"Voici la source qui pourrait t'être utile :  \n- {distinct_sources_str}"
+            return f"This might be useful to you:  \n- {distinct_sources_str}"
 
         elif len(distinct_sources) > 1:
-            return f"Voici {len(distinct_sources)} sources qui pourraient t'être utiles :  \n- {distinct_sources_str}"
+            return f"Here are {len(distinct_sources)} sources that might be useful to you:  \n- {distinct_sources_str}"
 
         else:
-            return "Désolé je n'ai trouvé aucune ressource pour répondre à ta question"
+            return "Sorry, I couldn't find any resources to answer your question."

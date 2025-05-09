@@ -2,10 +2,14 @@
 if __name__ == '__main__':
     from help_desk import HelpDesk
 
+    print("Using Ollama with Mistral model")
+    
     model = HelpDesk(new_db=True)
 
-    print(model.db._collection.count())
+    print(f"Vectorstore contains {model.db._collection.count()} document chunks")
 
-    prompt = 'Comment faire ma photo de profil Octo ?'
+    prompt = 'What is platform engineering?'
+    print(f"\nQuestion: {prompt}")
     result, sources = model.retrieval_qa_inference(prompt)
-    print(result, sources)
+    print("\nAnswer:", result)
+    print("\nSources:", sources)

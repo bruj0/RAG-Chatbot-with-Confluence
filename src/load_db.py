@@ -9,6 +9,7 @@ from config import (CONFLUENCE_SPACE_NAME, CONFLUENCE_SPACE_KEY,
 from langchain.document_loaders import ConfluenceLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.text_splitter import MarkdownHeaderTextSplitter
+from langchain.embeddings import HuggingFaceEmbeddings
 
 class DataLoader():
     """Create, load, save the DB using the confluence Loader"""
@@ -70,23 +71,25 @@ class DataLoader():
         splitted_docs = splitter.split_documents(md_docs)
         return splitted_docs
 
-    def save_to_db(self, splitted_docs, embeddings):
+    def save_to_db(self, splitted_docs):
         """Save chunks to Chroma DB"""
         from langchain.vectorstores import Chroma
+        embeddings = HuggingFaceEmbeddings()
         db = Chroma.from_documents(splitted_docs, embeddings, persist_directory=self.persist_directory)
         db.persist()
         return db
 
-    def load_from_db(self, embeddings):
+    def load_from_db(self):
         """Loader chunks to Chroma DB"""
         from langchain.vectorstores import Chroma
+        embeddings = HuggingFaceEmbeddings()
         db = Chroma(
             persist_directory=self.persist_directory,
             embedding_function=embeddings
         )
         return db
 
-    def set_db(self, embeddings):
+    def set_db(self):
         """Create, save, and load db"""
         try:
             shutil.rmtree(self.persist_directory)
@@ -100,13 +103,13 @@ class DataLoader():
         splitted_docs = self.split_docs(docs)
 
         # Save to DB
-        db = self.save_to_db(splitted_docs, embeddings)
+        db = self.save_to_db(splitted_docs)
 
         return db
 
-    def get_db(self, embeddings):
+    def get_db(self):
         """Create, save, and load db"""
-        db = self.load_from_db(embeddings)
+        db = self.load_from_db()
         return db
 
 
